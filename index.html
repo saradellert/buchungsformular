@@ -21,11 +21,11 @@ body {
 form {
   max-width: 480px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255,255,255,0.65);
   backdrop-filter: blur(10px);
   border-radius: 18px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   position: relative;
 }
 h2 {
@@ -50,7 +50,9 @@ input, select, textarea {
   margin-top: 0.25rem;
   font-family: 'Poppins', sans-serif;
 }
-textarea { resize: vertical; }
+textarea { resize: none; }
+
+/* Buttons */
 button {
   width: 100%;
   background: #292826;
@@ -64,6 +66,10 @@ button {
   transition: 0.2s ease;
 }
 button:hover { background: #3A3A36; }
+button.loading {
+  background: #44433F;
+  cursor: wait;
+}
 
 /* Adults counter */
 .counter {
@@ -73,13 +79,13 @@ button:hover { background: #3A3A36; }
   border: 1px solid #ccc;
   border-radius: 12px;
   width: 160px;
-  margin-top: 0.25rem;
   height: 48px;
-  padding: 0 4px;
+  margin-top: 0.25rem;
+  padding: 0 6px;
 }
 .counter button {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   background: #f0f0f0;
   color: #292826;
@@ -120,7 +126,7 @@ button:hover { background: #3A3A36; }
   border-color: #292826;
 }
 
-/* Flatpickr custom */
+/* Flatpickr */
 .flatpickr-calendar {
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -133,12 +139,12 @@ button:hover { background: #3A3A36; }
   padding-left: 0.25rem;
 }
 
-/* Success overlay */
+/* Overlay */
 #overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(4px);
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(6px);
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -211,9 +217,9 @@ button:hover { background: #3A3A36; }
   <label>Sonstiges</label>
   <textarea name="notes" rows="3" placeholder="Ihre Nachricht …"></textarea>
 
-  <button type="submit">Anfrage senden</button>
+  <button type="submit" id="submitBtn">Anfrage senden</button>
 
-  <div id="overlay"><p>Ihre Anfrage wurde gesendet.<br>E-Mail wird in Kürze versendet …</p></div>
+  <div id="overlay"><p>Vielen Dank für Ihre Anfrage!<br>Sie erhalten in Kürze eine Bestätigung per E-Mail.</p></div>
 </form>
 
 <script>
@@ -263,7 +269,13 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
+  const btn = document.getElementById("submitBtn");
   const overlay = document.getElementById("overlay");
+
+  btn.textContent = "Wird gesendet …";
+  btn.classList.add("loading");
+  btn.disabled = true;
+
   try {
     const res = await fetch("https://script.google.com/macros/s/AKfycbzA9UOuNCaStraqAjEAtXfOKkG7d7PuJL-ObdaOzpyTxzMdESBSkZUi4xcalzm2clQ73Q/exec", {
       method: "POST",
@@ -275,10 +287,16 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
         overlay.classList.remove("active");
         form.reset();
         document.getElementById("selectedRange").textContent = "Bitte Zeitraum wählen";
-      }, 3500);
+        btn.textContent = "Anfrage senden";
+        btn.classList.remove("loading");
+        btn.disabled = false;
+      }, 4000);
     } else alert("Fehler beim Senden – bitte nochmal versuchen.");
   } catch (err) {
     alert("Fehler: " + err.message);
+    btn.textContent = "Anfrage senden";
+    btn.classList.remove("loading");
+    btn.disabled = false;
   }
 });
 </script>
