@@ -26,6 +26,7 @@ form {
   border-radius: 18px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 h2 {
   font-weight: 600;
@@ -61,7 +62,6 @@ button {
   margin-top: 1.5rem;
   cursor: pointer;
   transition: 0.2s ease;
-  font-family: 'Poppins', sans-serif;
 }
 button:hover { background: #3A3A36; }
 
@@ -69,35 +69,39 @@ button:hover { background: #3A3A36; }
 .counter {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   border: 1px solid #ccc;
   border-radius: 12px;
   width: 160px;
   margin-top: 0.25rem;
+  height: 48px;
+  padding: 0 4px;
 }
 .counter button {
-  width: 42px;
+  width: 40px;
   height: 40px;
   border-radius: 10px;
   background: #f0f0f0;
   color: #292826;
   font-size: 1.3rem;
   font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: 0.2s ease;
-  border: none;
 }
 .counter button:hover { background: #e5e5e5; }
 .counter span {
-  flex: 1;
   text-align: center;
+  flex: 1;
   font-size: 1rem;
 }
 
 /* Haustier buttons */
 .pet-buttons {
   display: flex;
-  justify-content: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
@@ -128,11 +132,30 @@ button:hover { background: #3A3A36; }
   color: #3A3A36;
   padding-left: 0.25rem;
 }
-.success {
+
+/* Success overlay */
+#overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
   text-align: center;
-  font-weight: 600;
-  padding: 1rem;
-  color: #3A4437;
+}
+#overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+#overlay p {
+  font-size: 1.05rem;
+  color: #292826;
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -189,7 +212,8 @@ button:hover { background: #3A3A36; }
   <textarea name="notes" rows="3" placeholder="Ihre Nachricht …"></textarea>
 
   <button type="submit">Anfrage senden</button>
-  <div id="responseMsg" class="success" style="display:none;">Danke – Ihre Anfrage wurde gesendet!</div>
+
+  <div id="overlay"><p>Ihre Anfrage wurde gesendet.<br>E-Mail wird in Kürze versendet …</p></div>
 </form>
 
 <script>
@@ -239,16 +263,19 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
+  const overlay = document.getElementById("overlay");
   try {
     const res = await fetch("https://script.google.com/macros/s/AKfycbzA9UOuNCaStraqAjEAtXfOKkG7d7PuJL-ObdaOzpyTxzMdESBSkZUi4xcalzm2clQ73Q/exec", {
       method: "POST",
       body: JSON.stringify(data)
     });
     if (res.ok) {
-      form.reset();
-      document.getElementById("selectedRange").textContent = "Bitte Zeitraum wählen";
-      document.getElementById("responseMsg").style.display = "block";
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      overlay.classList.add("active");
+      setTimeout(() => {
+        overlay.classList.remove("active");
+        form.reset();
+        document.getElementById("selectedRange").textContent = "Bitte Zeitraum wählen";
+      }, 3500);
     } else alert("Fehler beim Senden – bitte nochmal versuchen.");
   } catch (err) {
     alert("Fehler: " + err.message);
