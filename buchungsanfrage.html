@@ -1,1 +1,142 @@
-dsasd
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buchungsanfrage</title>
+
+<!-- Flatpickr (Date-Range-Picker) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+  background: transparent;
+  color: #292826;
+  margin: 0;
+  padding: 0;
+}
+form {
+  max-width: 450px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+input, select, textarea, button {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+button {
+  background: #292826;
+  color: white;
+  border: none;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+button:hover { background: #3A3A36; }
+.success {
+  text-align: center;
+  font-weight: 600;
+  padding: 1rem;
+  color: #3A4437;
+}
+</style>
+</head>
+
+<body>
+<form id="bookingForm">
+  <h2>Buchungsanfrage</h2>
+
+  <label>Vor- und Nachname *</label>
+  <input type="text" name="name" autocomplete="name" required>
+
+  <label>Email *</label>
+  <input type="email" name="email" autocomplete="email" required>
+
+  <label>Telefonnummer *</label>
+  <input type="tel" name="phone" autocomplete="tel" placeholder="+49 123 456789" required>
+
+  <label>Wohnung *</label>
+  <select name="apartment" required>
+    <option value="">Wohnung auswählen</option>
+    <option value="Seeblick">Seeblick</option>
+    <option value="Gartenblick">Gartenblick</option>
+    <option value="Sonnenhof">Sonnenhof</option>
+  </select>
+
+  <label>Zeitraum *</label>
+  <input id="dateRange" name="dateRange" placeholder="Anreise – Abreise" readonly required>
+  <input type="hidden" name="arrival">
+  <input type="hidden" name="departure">
+
+  <label>Anzahl Personen (Erwachsene)</label>
+  <input type="number" name="adults" min="1" max="10" value="1">
+
+  <label>Anzahl Kinder (bitte Alter angeben)</label>
+  <input type="text" name="children" placeholder="z. B. 1 Kind (10 Jahre)">
+
+  <label>Haustier *</label>
+  <select name="pet" required>
+    <option value="Nein">Nein</option>
+    <option value="Ja">Ja</option>
+  </select>
+
+  <label>Sonstiges</label>
+  <textarea name="notes" rows="3" placeholder="Ihre Nachricht…"></textarea>
+
+  <button type="submit">Anfrage senden</button>
+  <div id="responseMsg" class="success" style="display:none;">Danke – Ihre Anfrage wurde gesendet!</div>
+</form>
+
+<script>
+const dateRange = flatpickr("#dateRange", {
+  mode: "range",
+  dateFormat: "Y-m-d",
+  onClose: function(selectedDates) {
+    if(selectedDates.length === 2) {
+      document.querySelector('input[name="arrival"]').value = selectedDates[0].toISOString().split('T')[0];
+      document.querySelector('input[name="departure"]').value = selectedDates[1].toISOString().split('T')[0];
+    }
+  }
+});
+
+document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbwMIN3aqq1-f9_5_Ud3d6V3xICUCD8hdFOBEYMtNn1ETPawsZg9uhHZvUNYdpnzNqMErw/exec", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    if(res.ok) {
+      form.reset();
+      document.getElementById("responseMsg").style.display = "block";
+    } else alert("Fehler beim Senden – bitte nochmal versuchen.");
+  } catch(err) {
+    alert("Fehler: " + err.message);
+  }
+});
+</script>
+</body>
+</html>
