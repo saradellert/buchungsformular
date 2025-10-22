@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Buchungsanfrage</title>
 
-<!-- Flatpickr (Date-Range-Picker) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
 
 <style>
 body {
@@ -18,42 +19,110 @@ body {
   padding: 0;
 }
 form {
-  max-width: 450px;
+  max-width: 480px;
   margin: 0 auto;
-  background: rgba(255,255,255,0.65);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(10px);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
+  font-weight: 600;
+  font-size: 1.5rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 label {
   display: block;
   margin-top: 1rem;
   font-weight: 500;
+  font-size: 0.95rem;
 }
-input, select, textarea, button {
+input, select, textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
   box-sizing: border-box;
+  margin-top: 0.25rem;
 }
+textarea { resize: vertical; }
 button {
+  width: 100%;
   background: #292826;
   color: white;
   border: none;
+  border-radius: 12px;
+  padding: 0.9rem;
+  font-size: 1rem;
   margin-top: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 button:hover { background: #3A3A36; }
+
+/* Adults counter */
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.5rem;
+}
+.counter button {
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f0f0f0;
+  color: #292826;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.counter button:hover { background: #e5e5e5; }
+.counter span {
+  flex: 1;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* Haustier buttons */
+.pet-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.pet-buttons button {
+  flex: 1;
+  background: #f0f0f0;
+  color: #292826;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 0.5rem 0;
+  font-weight: 500;
+}
+.pet-buttons button.active {
+  background: #292826;
+  color: white;
+  border-color: #292826;
+}
+
+/* Flatpickr custom */
+.flatpickr-calendar {
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#selectedRange {
+  text-align: center;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  color: #3A3A36;
+}
 .success {
   text-align: center;
   font-weight: 600;
@@ -68,13 +137,13 @@ button:hover { background: #3A3A36; }
   <h2>Buchungsanfrage</h2>
 
   <label>Vor- und Nachname *</label>
-  <input type="text" name="name" autocomplete="name" required>
+  <input type="text" name="name" autocomplete="name" required />
 
   <label>Email *</label>
-  <input type="email" name="email" autocomplete="email" required>
+  <input type="email" name="email" autocomplete="email" required />
 
   <label>Telefonnummer *</label>
-  <input type="tel" name="phone" autocomplete="tel" placeholder="+49 123 456789" required>
+  <input type="tel" name="phone" autocomplete="tel" placeholder="+49 123 456789" required />
 
   <label>Wohnung *</label>
   <select name="apartment" required>
@@ -85,41 +154,83 @@ button:hover { background: #3A3A36; }
   </select>
 
   <label>Zeitraum *</label>
-  <input id="dateRange" name="dateRange" placeholder="Anreise – Abreise" readonly required>
-  <input type="hidden" name="arrival">
-  <input type="hidden" name="departure">
+  <div id="calendarContainer"></div>
+  <div id="selectedRange">Bitte Zeitraum wählen</div>
+  <input type="hidden" name="arrival" />
+  <input type="hidden" name="departure" />
 
   <label>Anzahl Personen (Erwachsene)</label>
-  <input type="number" name="adults" min="1" max="10" value="1">
+  <div class="counter">
+    <button type="button" id="minusAdult">−</button>
+    <span id="adultCount">1</span>
+    <button type="button" id="plusAdult">+</button>
+  </div>
+  <input type="hidden" name="adults" value="1" />
 
   <label>Anzahl Kinder (bitte Alter angeben)</label>
-  <input type="text" name="children" placeholder="z. B. 1 Kind (10 Jahre)">
+  <input type="text" name="children" placeholder="z. B. 1 Kind (10 Jahre)" />
 
   <label>Haustier *</label>
-  <select name="pet" required>
-    <option value="Nein">Nein</option>
-    <option value="Ja">Ja</option>
-  </select>
+  <div class="pet-buttons">
+    <button type="button" data-value="Ja">Ja</button>
+    <button type="button" data-value="Nein" class="active">Nein</button>
+  </div>
+  <input type="hidden" name="pet" value="Nein" />
 
   <label>Sonstiges</label>
-  <textarea name="notes" rows="3" placeholder="Ihre Nachricht…"></textarea>
+  <textarea name="notes" rows="3" placeholder="Ihre Nachricht …"></textarea>
 
   <button type="submit">Anfrage senden</button>
   <div id="responseMsg" class="success" style="display:none;">Danke – Ihre Anfrage wurde gesendet!</div>
 </form>
 
 <script>
-const dateRange = flatpickr("#dateRange", {
+// === Kalender ===
+flatpickr("#calendarContainer", {
+  inline: true,
   mode: "range",
-  dateFormat: "Y-m-d",
-  onClose: function(selectedDates) {
-    if(selectedDates.length === 2) {
-      document.querySelector('input[name="arrival"]').value = selectedDates[0].toISOString().split('T')[0];
-      document.querySelector('input[name="departure"]').value = selectedDates[1].toISOString().split('T')[0];
+  locale: "de",
+  dateFormat: "d.m.Y",
+  onChange: function(selectedDates, dateStr) {
+    const range = document.getElementById("selectedRange");
+    if (selectedDates.length === 2) {
+      const [start, end] = selectedDates;
+      const arrival = start.toLocaleDateString("de-DE");
+      const departure = end.toLocaleDateString("de-DE");
+      range.textContent = `Von ${arrival} bis ${departure}`;
+      document.querySelector('input[name="arrival"]').value = arrival;
+      document.querySelector('input[name="departure"]').value = departure;
+    } else {
+      range.textContent = "Bitte Zeitraum wählen";
     }
   }
 });
 
+// === Erwachsenen Counter ===
+let adults = 1;
+const adultDisplay = document.getElementById("adultCount");
+document.getElementById("plusAdult").onclick = () => {
+  if (adults < 10) adults++;
+  adultDisplay.textContent = adults;
+  document.querySelector('input[name="adults"]').value = adults;
+};
+document.getElementById("minusAdult").onclick = () => {
+  if (adults > 1) adults--;
+  adultDisplay.textContent = adults;
+  document.querySelector('input[name="adults"]').value = adults;
+};
+
+// === Haustier Buttons ===
+const petButtons = document.querySelectorAll(".pet-buttons button");
+petButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    petButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelector('input[name="pet"]').value = btn.dataset.value;
+  });
+});
+
+// === Formular Absenden ===
 document.getElementById("bookingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -129,11 +240,13 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       method: "POST",
       body: JSON.stringify(data)
     });
-    if(res.ok) {
+    if (res.ok) {
       form.reset();
+      document.getElementById("selectedRange").textContent = "Bitte Zeitraum wählen";
       document.getElementById("responseMsg").style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else alert("Fehler beim Senden – bitte nochmal versuchen.");
-  } catch(err) {
+  } catch (err) {
     alert("Fehler: " + err.message);
   }
 });
