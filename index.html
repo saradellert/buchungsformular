@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Buchungsanfrage</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
 
 <style>
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background: transparent;
   color: #292826;
   margin: 0;
@@ -47,6 +47,7 @@ input, select, textarea {
   font-size: 1rem;
   box-sizing: border-box;
   margin-top: 0.25rem;
+  font-family: 'Poppins', sans-serif;
 }
 textarea { resize: vertical; }
 button {
@@ -60,6 +61,7 @@ button {
   margin-top: 1.5rem;
   cursor: pointer;
   transition: 0.2s ease;
+  font-family: 'Poppins', sans-serif;
 }
 button:hover { background: #3A3A36; }
 
@@ -67,14 +69,14 @@ button:hover { background: #3A3A36; }
 .counter {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   border: 1px solid #ccc;
   border-radius: 12px;
+  width: 160px;
   margin-top: 0.25rem;
-  padding: 0.3rem 0.5rem;
 }
 .counter button {
-  flex: 0 0 40px;
+  width: 42px;
   height: 40px;
   border-radius: 10px;
   background: #f0f0f0;
@@ -83,6 +85,7 @@ button:hover { background: #3A3A36; }
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
+  border: none;
 }
 .counter button:hover { background: #e5e5e5; }
 .counter span {
@@ -94,11 +97,12 @@ button:hover { background: #3A3A36; }
 /* Haustier buttons */
 .pet-buttons {
   display: flex;
+  justify-content: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
 .pet-buttons button {
-  flex: 1;
+  flex: 0 0 80px;
   background: #f0f0f0;
   color: #292826;
   border: 1px solid #ccc;
@@ -118,10 +122,11 @@ button:hover { background: #3A3A36; }
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 #selectedRange {
-  text-align: center;
+  text-align: left;
   font-weight: 500;
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   color: #3A3A36;
+  padding-left: 0.25rem;
 }
 .success {
   text-align: center;
@@ -148,9 +153,12 @@ button:hover { background: #3A3A36; }
   <label>Wohnung *</label>
   <select name="apartment" required>
     <option value="">Wohnung auswählen</option>
-    <option value="Seeblick">Seeblick</option>
-    <option value="Gartenblick">Gartenblick</option>
-    <option value="Sonnenhof">Sonnenhof</option>
+    <option value="La Maison">La Maison</option>
+    <option value="Maisonette Beach">Maisonette Beach</option>
+    <option value="Suite Maritim">Suite Maritim</option>
+    <option value="Malibu S">Malibu S</option>
+    <option value="Malibu L">Malibu L</option>
+    <option value="Cottage & Garden">Cottage & Garden</option>
   </select>
 
   <label>Zeitraum *</label>
@@ -185,13 +193,12 @@ button:hover { background: #3A3A36; }
 </form>
 
 <script>
-// === Kalender ===
 flatpickr("#calendarContainer", {
   inline: true,
   mode: "range",
   locale: "de",
   dateFormat: "d.m.Y",
-  onChange: function(selectedDates, dateStr) {
+  onChange: function(selectedDates) {
     const range = document.getElementById("selectedRange");
     if (selectedDates.length === 2) {
       const [start, end] = selectedDates;
@@ -206,7 +213,6 @@ flatpickr("#calendarContainer", {
   }
 });
 
-// === Erwachsenen Counter ===
 let adults = 1;
 const adultDisplay = document.getElementById("adultCount");
 document.getElementById("plusAdult").onclick = () => {
@@ -220,7 +226,6 @@ document.getElementById("minusAdult").onclick = () => {
   document.querySelector('input[name="adults"]').value = adults;
 };
 
-// === Haustier Buttons ===
 const petButtons = document.querySelectorAll(".pet-buttons button");
 petButtons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -230,13 +235,12 @@ petButtons.forEach(btn => {
   });
 });
 
-// === Formular Absenden ===
 document.getElementById("bookingForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbwMIN3aqq1-f9_5_Ud3d6V3xICUCD8hdFOBEYMtNn1ETPawsZg9uhHZvUNYdpnzNqMErw/exec", {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbzA9UOuNCaStraqAjEAtXfOKkG7d7PuJL-ObdaOzpyTxzMdESBSkZUi4xcalzm2clQ73Q/exec", {
       method: "POST",
       body: JSON.stringify(data)
     });
