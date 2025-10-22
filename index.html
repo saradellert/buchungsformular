@@ -52,7 +52,7 @@ input, select, textarea {
 }
 textarea { resize: none; }
 
-/* Buttons */
+/* Buttons - OPTIMIZED */
 button {
   width: 100%;
   background: #292826;
@@ -63,12 +63,41 @@ button {
   font-size: 1rem;
   margin-top: 1.5rem;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: transform 0.15s ease, background 0.2s ease;
+  will-change: transform;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
-button:hover { background: #3A3A36; }
+button:hover { 
+  background: #3A3A36;
+}
+button:active {
+  transform: scale(0.98);
+}
 button.loading {
   background: #44433F;
   cursor: wait;
+  transform: scale(0.98);
+}
+
+/* Loading Spinner - NEW */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+button.loading .spinner {
+  display: block;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Adults counter */
@@ -96,9 +125,10 @@ button.loading {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 .counter button:hover { background: #e5e5e5; }
+.counter button:active { transform: scale(0.95); }
 .counter span {
   text-align: center;
   flex: 1;
@@ -119,6 +149,10 @@ button.loading {
   border-radius: 20px;
   padding: 0.5rem 0;
   font-weight: 500;
+  transition: all 0.15s ease;
+}
+.pet-buttons button:active {
+  transform: scale(0.95);
 }
 .pet-buttons button.active {
   background: #292826;
@@ -139,29 +173,43 @@ button.loading {
   padding-left: 0.25rem;
 }
 
-/* Overlay */
+/* Overlay - OPTIMIZED */
 #overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
+  transform: scale(0.95);
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  will-change: opacity, transform;
   text-align: center;
 }
 #overlay.active {
   opacity: 1;
+  transform: scale(1);
   pointer-events: all;
 }
 #overlay p {
   font-size: 1.05rem;
   color: #292826;
   line-height: 1.5;
+  animation: fadeInUp 0.4s ease;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
 </head>
@@ -217,7 +265,10 @@ button.loading {
   <label>Sonstiges</label>
   <textarea name="notes" rows="3" placeholder="Ihre Nachricht …"></textarea>
 
-  <button type="submit" id="submitBtn">Anfrage senden</button>
+  <button type="submit" id="submitBtn">
+    <span class="spinner"></span>
+    <span id="btnText">Anfrage senden</span>
+  </button>
 
   <div id="overlay"><p>Vielen Dank für Ihre Anfrage!<br>Sie erhalten in Kürze eine Bestätigung per E-Mail.</p></div>
 </form>
@@ -270,31 +321,44 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
   const btn = document.getElementById("submitBtn");
+  const btnText = document.getElementById("btnText");
   const overlay = document.getElementById("overlay");
 
-  btn.textContent = "Wird gesendet …";
+  // Immediate visual feedback
   btn.classList.add("loading");
   btn.disabled = true;
+  btnText.textContent = "Wird gesendet …";
 
   try {
     const res = await fetch("https://script.google.com/macros/s/AKfycbzA9UOuNCaStraqAjEAtXfOKkG7d7PuJL-ObdaOzpyTxzMdESBSkZUi4xcalzm2clQ73Q/exec", {
       method: "POST",
       body: JSON.stringify(data)
     });
+    
     if (res.ok) {
+      // Show success overlay immediately
       overlay.classList.add("active");
+      
+      // Reset after delay
       setTimeout(() => {
         overlay.classList.remove("active");
         form.reset();
+        adults = 1;
+        adultDisplay.textContent = adults;
         document.getElementById("selectedRange").textContent = "Bitte Zeitraum wählen";
-        btn.textContent = "Anfrage senden";
+        btnText.textContent = "Anfrage senden";
         btn.classList.remove("loading");
         btn.disabled = false;
       }, 4000);
-    } else alert("Fehler beim Senden – bitte nochmal versuchen.");
+    } else {
+      alert("Fehler beim Senden – bitte nochmal versuchen.");
+      btnText.textContent = "Anfrage senden";
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
   } catch (err) {
     alert("Fehler: " + err.message);
-    btn.textContent = "Anfrage senden";
+    btnText.textContent = "Anfrage senden";
     btn.classList.remove("loading");
     btn.disabled = false;
   }
